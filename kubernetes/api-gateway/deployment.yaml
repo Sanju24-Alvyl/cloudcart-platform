@@ -1,0 +1,83 @@
+apiVersion: apps/v1
+kind: Deployment
+
+metadata:
+  name: api-gateway
+  namespace: cloudcart-dev
+
+  labels:
+    app: api-gateway
+    app.kubernetes.io/name: api-gateway
+    app.kubernetes.io/part-of: cloudcart
+
+spec:
+  replicas: 2
+
+  revisionHistoryLimit: 10
+
+  selector:
+    matchLabels:
+      app: api-gateway
+
+  strategy:
+    type: RollingUpdate
+
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+  template:
+    metadata:
+      labels:
+        app: api-gateway
+        app.kubernetes.io/name: api-gateway
+        app.kubernetes.io/part-of: cloudcart
+
+    spec:
+      terminationGracePeriodSeconds: 30
+
+      containers:
+      - name: api-gateway
+
+        image: cloudcart/api-gateway:v0.1.0
+
+        imagePullPolicy: IfNotPresent
+
+        ports:
+        - containerPort: 8080
+
+        env:
+        - name: PORT
+          value: "8080"
+
+        resources:
+          requests:
+            cpu: "100m"
+            memory: "128Mi"
+
+          limits:
+            cpu: "250m"
+            memory: "256Mi"
+
+        livenessProbe:
+          httpGet:
+            path: /health/live
+            port: 8080
+
+          initialDelaySeconds: 10
+          periodSeconds: 10
+
+        readinessProbe:
+          httpGet:
+            path: /health/ready
+            port: 8080
+
+          initialDelaySeconds: 5
+          periodSeconds: 5
+
+        securityContext:
+          allowPrivilegeEscalation: false
+          readOnlyRootFilesystem: true
+          capabilities:
+            drop:
+            - ALL
