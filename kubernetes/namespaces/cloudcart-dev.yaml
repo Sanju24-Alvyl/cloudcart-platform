@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+
+metadata:
+  name: cloudcart-dev
+
+  labels:
+    app.kubernetes.io/part-of: cloudcart
+    environment: development
